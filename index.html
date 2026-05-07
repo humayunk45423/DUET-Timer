@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>DUET Admission</title>
+    
+    <script>
+        // Load saved theme immediately to prevent flash
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    </script>
+
+    <style>
+        /* ================= THEME VARIABLES ================= */
+        :root {
+            /* DARK MODE (Immersive OLED Neon) */
+            --bg-color: #020203;
+            --panel-bg: rgba(255, 255, 255, 0.04);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --accent-glow: #00e5ff; /* Eye-popping Cyan */
+            --slash-color: #ff0055; /* Neon Pink/Red */
+            --text-main: #ffffff;
+            --text-muted: #888888;
+            --top-glow: radial-gradient(circle at top center, rgba(0, 229, 255, 0.15) 0%, transparent 70%);
+            --cal-bg: #000000;
+        }
+
+        [data-theme="light"] {
+            /* LIGHT MODE (Glassy & Bright) */
+            --bg-color: #f0f2f5;
+            --panel-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(0, 0, 0, 0.08);
+            --accent-glow: #00b8d4; /* Deep Cyan for light mode */
+            --slash-color: #ff0055;
+            --text-main: #111111;
+            --text-muted: #666666;
+            --top-glow: radial-gradient(circle at top center, rgba(0, 184, 212, 0.15) 0%, transparent 70%);
+            --cal-bg: #e4e7ec;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            margin: 0;
+            padding: 0;
+            /* 100% OFFLINE FONTS - Tuned to look premium */
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            transition: background-color 0.4s ease, color 0.4s ease;
+        }
+
+        body {
+            background: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            height: 100dvh; /* Handles browser search bar issues */
+            overflow: hidden;
+        }
+
+        ::-webkit-scrollbar { display: none; }
+
+        /* ================= HEADER ================= */
+        header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: calc(env(safe-area-inset-top, 15px) + 15px) 20px 10px 20px;
+            z-index: 100;
+        }
+
+        .app-title {
+            font-size: 14px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--accent-glow);
+            text-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
+        }
+
+        .theme-toggle {
+            background: var(--panel-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            backdrop-filter: blur(10px);
+        }
+
+        /* ================= TOP HALF ================= */
+        #top-half {
+            flex: 0 0 52%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: calc(env(safe-area-inset-top, 15px) + 50px) 20px 20px 20px;
+            z-index: 1;
+            background: var(--top-glow);
+            border-bottom: 1px solid var(--glass-border);
+            position: relative;
+        }
+
+        .section-lbl {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 15px;
+        }
+
+        /* Exact Grid (Months, Weeks, Days...) */
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+            width: 100%;
+            max-width: 400px;
+            margin-bottom: 20px;
+        }
+
+        .bento-card {
+            background: var(--panel-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 12px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .b-val {
+            font-size: 20px;
+            font-weight: 900;
+            color: var(--text-main);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .b-lbl {
+            font-size: 8px;
+            font-weight: 800;
+            color: var(--accent-glow);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+
+        /* Totals List */
+        .totals-container {
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .tot-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(90deg, transparent, var(--panel-bg), transparent);
+            padding: 8px 15px;
+            border-radius: 8px;
+            border-left: 2px solid var(--accent-glow);
+        }
+
+        .tot-lbl {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-muted);
+            letter-spacing: 2px;
+        }
+
+        .tot-val {
+            font-size: 16px;
+            font-weight: 900;
+            color: var(--text-main);
+            font-variant-numeric: tabular-nums;
+            text-shadow: 0 0 10px rgba(255,255,255,0.2);
+        }
+
+        /* ================= BOTTOM HALF (CALENDAR) ================= */
+        #bottom-half {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 20px 40px 20px;
+            background: var(--cal-bg);
+            scroll-behavior: smooth;
+        }
+
+        .month-block {
+            margin-top: 25px;
+        }
+
+        .month-title {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 12px;
+            position: sticky;
+            top: 0;
+            background: var(--cal-bg);
+            padding: 15px 0 10px 0;
+            z-index: 10;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--glass-border);
+            opacity: 0.95;
+            backdrop-filter: blur(10px);
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+
+        .day-header {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-align: center;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+
+        .day {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 10px;
+            background: var(--panel-bg);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .cal-date {
+            position: absolute;
+            top: 4px;
+            left: 6px;
+            font-size: 9px;
+            color: var(--text-muted);
+            font-weight: 700;
+        }
+
+        .cal-left {
+            font-size: 15px;
+            font-weight: 900;
+            color: var(--text-main);
+        }
+
+        /* Crossed out days */
+        .day.crossed {
+            background: transparent;
+            opacity: 0.5;
+            border-color: transparent;
+        }
+        
+        .day.crossed .cal-left {
+            color: var(--text-muted);
+        }
+
+        .day.crossed::after {
+            content: '';
+            position: absolute;
+            width: 140%;
+            height: 2.5px;
+            background: var(--slash-color);
+            transform: rotate(-45deg);
+            box-shadow: 0 0 10px var(--slash-color);
+            border-radius: 5px;
+        }
+
+        /* Today */
+        .day.today {
+            border-color: var(--accent-glow);
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.2) inset;
+        }
+        .day.today .cal-left {
+            color: var(--accent-glow);
+            text-shadow: 0 0 15px rgba(0, 229, 255, 0.6);
+        }
+
+        /* Target Day */
+        .day.target {
+            background: var(--accent-glow);
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
+            border: none;
+        }
+        .day.target .cal-left, .day.target .cal-date {
+            color: #000;
+            font-weight: 900;
+        }
+        
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="app-title">DUET Admission</div>
+        <div class="theme-toggle" id="theme-btn" onclick="toggleTheme()">🌙</div>
+    </header>
+
+    <div id="top-half">
+        <div class="section-lbl">Exact Time Remaining</div>
+        
+        <div class="bento-grid">
+            <div class="bento-card"><span class="b-val" id="ex-mo">0</span><span class="b-lbl">Mon</span></div>
+            <div class="bento-card"><span class="b-val" id="ex-wk">0</span><span class="b-lbl">Wks</span></div>
+            <div class="bento-card"><span class="b-val" id="ex-dy">0</span><span class="b-lbl">Day</span></div>
+            <div class="bento-card"><span class="b-val" id="ex-hr">0</span><span class="b-lbl">Hrs</span></div>
+            <div class="bento-card"><span class="b-val" id="ex-mn">0</span><span class="b-lbl">Min</span></div>
+            <div class="bento-card"><span class="b-val" id="ex-sc">0</span><span class="b-lbl">Sec</span></div>
+        </div>
+
+        <div class="section-lbl" style="margin-top: 10px;">Absolute Totals Countdown</div>
+
+        <div class="totals-container">
+            <div class="tot-row"><span class="tot-lbl">TOTAL DAYS</span><span class="tot-val" id="tot-days">0</span></div>
+            <div class="tot-row"><span class="tot-lbl">TOTAL HOURS</span><span class="tot-val" id="tot-hours">0</span></div>
+            <div class="tot-row"><span class="tot-lbl">TOTAL MINS</span><span class="tot-val" id="tot-mins">0</span></div>
+            <div class="tot-row"><span class="tot-lbl">TOTAL SECS</span><span class="tot-val" id="tot-secs">0</span></div>
+        </div>
+    </div>
+
+    <div id="bottom-half">
+        <!-- Calendar injects here -->
+    </div>
+
+    <script>
+        // --- THEME TOGGLE ---
+        const themeBtn = document.getElementById('theme-btn');
+        function updateBtnIcon(theme) { themeBtn.innerText = theme === 'dark' ? '☀️' : '🌙'; }
+        updateBtnIcon(document.documentElement.getAttribute('data-theme'));
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateBtnIcon(newTheme);
+        }
+
+        // --- TARGET DATE (JULY 31) ---
+        function getTargetDate() {
+            const now = new Date();
+            let target = new Date(now.getFullYear(), 6, 31, 23, 59, 59); // 6 is July
+            if (now > target) {
+                target.setFullYear(target.getFullYear() + 1);
+            }
+            return target;
+        }
+
+        // --- TOP TIMER LOGIC ---
+        function updateTimers() {
+            const now = new Date();
+            const target = getTargetDate();
+            const diffMs = target - now;
+
+            if (diffMs <= 0) return;
+
+            document.getElementById('tot-days').innerText = Math.floor(diffMs / (1000 * 60 * 60 * 24)).toLocaleString();
+            document.getElementById('tot-hours').innerText = Math.floor(diffMs / (1000 * 60 * 60)).toLocaleString();
+            document.getElementById('tot-mins').innerText = Math.floor(diffMs / (1000 * 60)).toLocaleString();
+            document.getElementById('tot-secs').innerText = Math.floor(diffMs / 1000).toLocaleString();
+
+            let checkDate = new Date(now);
+            let eMonths = 0;
+
+            while (true) {
+                let nextMonth = new Date(checkDate);
+                nextMonth.setMonth(nextMonth.getMonth() + 1);
+                if (nextMonth <= target) { eMonths++; checkDate = nextMonth; } else { break; }
+            }
+
+            const remDaysDiff = Math.floor((target - checkDate) / (1000 * 60 * 60 * 24));
+            document.getElementById('ex-mo').innerText = eMonths;
+            document.getElementById('ex-wk').innerText = Math.floor(remDaysDiff / 7);
+            document.getElementById('ex-dy').innerText = remDaysDiff % 7;
+            document.getElementById('ex-hr').innerText = Math.floor((diffMs / (1000 * 60 * 60)) % 24);
+            document.getElementById('ex-mn').innerText = Math.floor((diffMs / 1000 / 60) % 60);
+            document.getElementById('ex-sc').innerText = Math.floor((diffMs / 1000) % 60);
+        }
+
+        // --- BOTTOM CALENDAR LOGIC ---
+        function buildCalendar() {
+            const bottomHalf = document.getElementById('bottom-half');
+            bottomHalf.innerHTML = ''; 
+
+            const now = new Date();
+            const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const targetFull = getTargetDate();
+            const targetMidnight = new Date(targetFull.getFullYear(), targetFull.getMonth(), targetFull.getDate());
+
+            let currentIter = new Date(now.getFullYear(), now.getMonth(), 1);
+
+            while (currentIter <= targetMidnight) {
+                const monthDiv = document.createElement('div');
+                monthDiv.className = 'month-block';
+
+                const title = document.createElement('div');
+                title.className = 'month-title';
+                title.innerText = currentIter.toLocaleString('default', { month: 'long', year: 'numeric' });
+                monthDiv.appendChild(title);
+
+                const grid = document.createElement('div');
+                grid.className = 'calendar-grid';
+
+                ['S','M','T','W','T','F','S'].forEach(d => {
+                    const dHeader = document.createElement('div');
+                    dHeader.className = 'day-header';
+                    dHeader.innerText = d;
+                    grid.appendChild(dHeader);
+                });
+
+                let firstDay = new Date(currentIter.getFullYear(), currentIter.getMonth(), 1).getDay();
+                let daysInMonth = new Date(currentIter.getFullYear(), currentIter.getMonth() + 1, 0).getDate();
+
+                for (let i = 0; i < firstDay; i++) { grid.appendChild(document.createElement('div')); }
+
+                for (let i = 1; i <= daysInMonth; i++) {
+                    let thisDate = new Date(currentIter.getFullYear(), currentIter.getMonth(), i);
+                    let daysLeftToTarget = Math.round((targetMidnight - thisDate) / (1000 * 60 * 60 * 24));
+
+                    const dayDiv = document.createElement('div');
+                    dayDiv.className = 'day';
+
+                    const dateSpan = document.createElement('span');
+                    dateSpan.className = 'cal-date';
+                    dateSpan.innerText = i;
+                    dayDiv.appendChild(dateSpan);
+
+                    const leftSpan = document.createElement('span');
+                    leftSpan.className = 'cal-left';
+                    leftSpan.innerText = daysLeftToTarget;
+                    dayDiv.appendChild(leftSpan);
+
+                    if (thisDate < todayMidnight) {
+                        dayDiv.classList.add('crossed');
+                    } else if (thisDate.getTime() === todayMidnight.getTime()) {
+                        dayDiv.classList.add('today');
+                    }
+
+                    if (thisDate.getTime() === targetMidnight.getTime()) {
+                        dayDiv.classList.add('target');
+                        leftSpan.innerText = "0"; 
+                        grid.appendChild(dayDiv);
+                        break; 
+                    }
+                    grid.appendChild(dayDiv);
+                }
+
+                monthDiv.appendChild(grid);
+                bottomHalf.appendChild(monthDiv);
+
+                if (currentIter.getMonth() === targetMidnight.getMonth() && currentIter.getFullYear() === targetMidnight.getFullYear()) { break; }
+                currentIter.setMonth(currentIter.getMonth() + 1);
+            }
+            
+            setTimeout(() => {
+                const todayEl = document.querySelector('.today');
+                if(todayEl) { todayEl.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+            }, 300);
+        }
+
+        // Initialize 
+        updateTimers();
+        setInterval(updateTimers, 1000);
+        buildCalendar();
+
+        setInterval(() => {
+            const now = new Date();
+            if (now.getHours() === 0 && now.getMinutes() === 0 && now.getSeconds() === 0) { buildCalendar(); }
+        }, 1000);
+
+    </script>
+</body>
+</html>
