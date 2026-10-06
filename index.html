@@ -357,102 +357,410 @@ header {
 #bottom-half      { animation: fadeUp 380ms cubic-bezier(0.25,0.46,0.45,0.94) 240ms both; }
 
 /* ══════════════════════════════════════
-   DESKTOP RESPONSIVE
-   On wide screens: side-by-side layout,
-   bigger fonts, constrained max-width,
-   centered card feel like a real app.
+   DESKTOP RESPONSIVE (≥ 768px)
+   Mobile styles above remain 100% untouched.
+   Desktop gets a premium, spacious, non-overlapping
+   dashboard with card architecture and smooth typography.
 ══════════════════════════════════════ */
-@media (min-width: 700px) {
+@media (min-width: 768px) {
     body {
         align-items: center;
-        justify-content: center;
+        justify-content: flex-start;
         background: var(--bg);
+        overflow-y: auto;
+        height: auto;
+        min-height: 100vh;
     }
 
-    /* Centered app card on desktop */
+    /* Full width centered layout with rich breathing room */
     #app-shell {
         width: 100%;
-        max-width: 1100px;
-        height: 100dvh;
-        display: flex;
-        flex-direction: column;
-        position: relative;
+        max-width: 1280px;
+        height: auto;
+        min-height: 100vh;
+        overflow: visible;
+        margin: 0 auto;
+        padding: 0 28px 60px;
     }
 
     header {
         position: relative;
-        padding: 28px 36px 0;
+        padding: 32px 8px 24px;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
 
-    .app-title { font-size: 15px; letter-spacing: 3px; }
+    .app-title {
+        font-size: 16px;
+        font-weight: 900;
+        letter-spacing: 3.5px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .app-title::before {
+        content: '';
+        display: inline-block;
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 12px var(--accent);
+    }
 
-    .theme-toggle { width: 42px; height: 42px; }
+    .theme-toggle {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        cursor: pointer;
+        transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s ease, background 0.2s ease;
+    }
+    .theme-toggle:hover {
+        transform: scale(1.06);
+        border-color: var(--accent);
+        background: rgba(255, 255, 255, 0.08);
+    }
+    [data-theme="light"] .theme-toggle:hover {
+        background: rgba(255, 255, 255, 0.95);
+    }
 
-    /* Top half: side by side on desktop */
+    /* Top hero card - side-by-side balanced dashboard */
     #top-half {
         flex: 0 0 auto;
         flex-direction: row;
         align-items: stretch;
-        justify-content: center;
-        padding: 32px 36px 28px;
+        justify-content: space-between;
+        padding: 32px 36px;
         gap: 36px;
-        min-height: 260px;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(16px);
+        margin-bottom: 32px;
+        min-height: auto;
+        border-bottom: 1px solid var(--border);
     }
 
     .top-left, .top-right {
         flex: 1;
         display: flex;
         flex-direction: column;
+        justify-content: space-between;
+        align-items: stretch;
+        max-width: none;
+        margin: 0;
+    }
+
+    .section-lbl {
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 2.5px;
+        color: var(--muted);
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    /* Bento 6-card row */
+    .bento-grid {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 10px;
+        width: 100%;
+        max-width: 100%;
+        margin-bottom: 0;
+        height: 100%;
+    }
+
+    .bento-card {
+        border-radius: 16px;
+        padding: 16px 6px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
-        max-width: 520px;
+        transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s ease, background 0.2s ease;
+    }
+    .bento-card:hover {
+        transform: translateY(-2px);
+        border-color: rgba(0, 229, 255, 0.4);
+        background: rgba(255, 255, 255, 0.06);
+    }
+    [data-theme="light"] .bento-card {
+        background: rgba(255, 255, 255, 0.65);
+    }
+    [data-theme="light"] .bento-card:hover {
+        background: #ffffff;
+        border-color: rgba(0, 151, 178, 0.4);
     }
 
-    .bento-grid {
+    .b-val {
+        font-size: 26px;
+        font-weight: 900;
+        letter-spacing: -0.5px;
+        line-height: 1.1;
+    }
+
+    .b-lbl {
+        font-size: 9.5px;
+        font-weight: 800;
+        letter-spacing: 1.5px;
+        margin-top: 6px;
+    }
+
+    /* Totals 2x2 grid */
+    .totals-container {
+        width: 100%;
         max-width: 100%;
-        gap: 10px;
-    }
-
-    .bento-card { border-radius: 16px; padding: 16px 0; }
-
-    .b-val  { font-size: 26px; }
-    .b-lbl  { font-size: 9px; margin-top: 6px; }
-
-    .totals-container { gap: 9px; max-width: 100%; }
-    .tot-row  { padding: 11px 18px; border-radius: 11px; }
-    .tot-lbl  { font-size: 11px; }
-    .tot-val  { font-size: 18px; }
-
-    .section-lbl { font-size: 11px; margin-bottom: 18px; }
-
-    /* Calendar: 2 columns side by side */
-    #bottom-half {
-        flex: 1;
-        padding: 0 36px 40px;
         display: grid;
         grid-template-columns: 1fr 1fr;
-        align-content: start;
-        column-gap: 36px;
-        overflow-y: auto;
+        gap: 10px;
+        height: 100%;
     }
 
-    .month-block { margin-top: 28px; }
-    .month-title { font-size: 16px; padding: 16px 0 10px; }
-    .calendar-grid { gap: 9px; }
-    .cal-date { font-size: 10px; top: 4px; left: 6px; }
-    .cal-left { font-size: 16px; }
-    .day-header { font-size: 11px; }
-    .day { border-radius: 12px; }
+    .tot-row {
+        padding: 14px 18px;
+        border-radius: 16px;
+        border-left: none;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.03);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+        gap: 4px;
+        transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s ease, background 0.2s ease;
+    }
+    .tot-row:hover {
+        transform: translateY(-2px);
+        border-color: rgba(0, 229, 255, 0.4);
+        background: rgba(255, 255, 255, 0.06);
+    }
+    [data-theme="light"] .tot-row {
+        background: rgba(255, 255, 255, 0.65);
+    }
+    [data-theme="light"] .tot-row:hover {
+        background: #ffffff;
+        border-color: rgba(0, 151, 178, 0.4);
+    }
+
+    .tot-lbl {
+        font-size: 9.5px;
+        font-weight: 800;
+        letter-spacing: 1.5px;
+    }
+
+    .tot-val {
+        font-size: 19px;
+        font-weight: 900;
+        color: var(--fg);
+        letter-spacing: -0.3px;
+        line-height: 1.1;
+    }
+
+    /* ── CALENDAR DESKTOP ── */
+    #bottom-half {
+        padding: 0;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px;
+        background: transparent;
+        overflow: visible;
+        height: auto;
+    }
+
+    .month-block {
+        margin-top: 0;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 22px 20px 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        backdrop-filter: blur(12px);
+        transition: border-color 0.25s ease, transform 0.25s ease;
+    }
+    .month-block:hover {
+        border-color: rgba(255, 255, 255, 0.15);
+    }
+    [data-theme="light"] .month-block:hover {
+        border-color: rgba(0, 0, 0, 0.12);
+    }
+
+    .month-title {
+        position: static;
+        font-size: 15px;
+        font-weight: 800;
+        color: var(--fg);
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        padding: 0;
+        margin-bottom: 0;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 12px;
+        background: transparent;
+    }
+
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 8px;
+    }
+
+    .day-header {
+        font-size: 11px;
+        font-weight: 800;
+        color: var(--muted);
+        text-align: center;
+        padding-bottom: 4px;
+        letter-spacing: 0.5px;
+    }
+
+    /* Non-overlapping, clean day cells */
+    .day {
+        position: relative;
+        aspect-ratio: 1;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.025);
+        border: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        padding: 5px 4px 6px;
+        transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        cursor: default;
+    }
+    .day:hover {
+        transform: translateY(-2px) scale(1.05);
+        border-color: rgba(0, 229, 255, 0.4);
+        background: rgba(255, 255, 255, 0.08);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+        z-index: 5;
+    }
+    [data-theme="light"] .day {
+        background: rgba(255, 255, 255, 0.55);
+    }
+    [data-theme="light"] .day:hover {
+        background: #ffffff;
+        border-color: rgba(0, 151, 178, 0.4);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Date number at top-left: completely separated from center countdown */
+    .cal-date {
+        position: static;
+        font-size: 10px;
+        font-weight: 700;
+        color: var(--muted);
+        align-self: flex-start;
+        line-height: 1;
+        margin-left: 2px;
+        opacity: 0.75;
+    }
+
+    /* Remaining days number centered */
+    .cal-left {
+        font-size: 13.5px;
+        font-weight: 800;
+        color: var(--fg);
+        line-height: 1;
+        margin-top: auto;
+        margin-bottom: auto;
+        letter-spacing: -0.3px;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .day.crossed {
+        background: transparent !important;
+        border-color: rgba(255, 255, 255, 0.03) !important;
+        opacity: 0.35;
+    }
+    [data-theme="light"] .day.crossed {
+        border-color: rgba(0, 0, 0, 0.04) !important;
+        opacity: 0.3;
+    }
+    .day.crossed:hover {
+        transform: none;
+        box-shadow: none;
+    }
+    .day.crossed .cal-left {
+        color: var(--muted);
+    }
+    .day.crossed .cal-date {
+        opacity: 0.5;
+    }
+    .day.crossed::after {
+        content: '';
+        position: absolute;
+        width: 130%;
+        height: 1.5px;
+        background: var(--slash);
+        transform: rotate(-45deg);
+        border-radius: 2px;
+        opacity: 0.8;
+    }
+
+    .day.today {
+        border-color: var(--accent) !important;
+        background: rgba(0, 229, 255, 0.1) !important;
+        box-shadow: 0 0 16px rgba(0, 229, 255, 0.25), 0 0 0 1px var(--accent) inset !important;
+    }
+    [data-theme="light"] .day.today {
+        background: rgba(0, 151, 178, 0.12) !important;
+        box-shadow: 0 0 16px rgba(0, 151, 178, 0.2), 0 0 0 1px var(--accent) inset !important;
+    }
+    .day.today .cal-date {
+        color: var(--accent);
+        font-weight: 800;
+        opacity: 1;
+    }
+    .day.today .cal-left {
+        color: var(--accent);
+        font-weight: 900;
+    }
+
+    .day.target {
+        background: linear-gradient(135deg, var(--accent) 0%, #00b0ff 100%) !important;
+        border: none !important;
+        box-shadow: 0 0 20px rgba(0, 229, 255, 0.4) !important;
+    }
+    .day.target .cal-date,
+    .day.target .cal-left {
+        color: #000 !important;
+        font-weight: 900;
+    }
 }
 
 @media (min-width: 1100px) {
     #bottom-half {
-        grid-template-columns: 1fr 1fr 1fr;
-        column-gap: 40px;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 26px;
     }
-    #top-half { padding: 36px 60px 32px; gap: 60px; }
-    header { padding: 32px 60px 0; }
-    #bottom-half { padding: 0 60px 50px; }
+    #top-half {
+        padding: 36px 40px;
+        gap: 40px;
+    }
+}
+
+@media (min-width: 1400px) {
+    #app-shell {
+        max-width: 1380px;
+    }
+    #bottom-half {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 30px;
+    }
 }
 </style>
 </head>
@@ -693,8 +1001,10 @@ function buildCalendar() {
     container.appendChild(frag);
 
     requestAnimationFrame(() => {
-        const todayEl = container.querySelector('.today');
-        if (todayEl) todayEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (window.innerWidth < 768) {
+            const todayEl = container.querySelector('.today');
+            if (todayEl) todayEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
     });
 }
 
